@@ -1,0 +1,141 @@
+RAW DATA
+
+
+Engine: InnoDB 
+Config: Binlog ON
+LOAD INFILE uncompressed to pipe
+real    11m58.910s
+user    0m34.650s
+sys     0m4.490s
+mysql> select count(*) from ontime_innodb;
++----------+
+| count(*) |
++----------+
+| 14009743 |
++----------+
+1 row in set (21.36 sec)
+
+Size : 
+[ec2-user@ip-172-30-1-9 scripts]$ sudo ls -la /var/lib/mysql/innodb_test
+total 5816328
+drwxr-x---. 2 mysql mysql         31 Feb 10 16:33 .
+drwxr-x--x. 9 mysql mysql       4096 Feb 10 17:31 ..
+-rw-r-----. 1 mysql mysql 5955911680 Feb 10 17:32 ontime_innodb.ibd
+[ec2-user@ip-172-30-1-9 scripts]$ sudo ls -lsh /var/lib/mysql/innodb_test
+total 5.6G
+5.6G -rw-r-----. 1 mysql mysql 5.6G Feb 10 17:32 ontime_innodb.ibd
+
+
+
+Engine: MyRocks 
+Config: Binlog ON
+LOAD INFILE uncompressed to pipe
+real    9m24.331s
+user    0m33.801s
+sys     0m4.653s
+mysql> select count(*) from myrocks_test.ontime_myrocks;
++----------+
+| count(*) |
++----------+
+| 14009743 |
++----------+
+1 row in set (53.58 sec)
+[root@ip-172-30-1-9 .rocksdb]# pwd
+/var/lib/mysql/.rocksdb
+[root@ip-172-30-1-9 .rocksdb]# du -sch .
+3.3G    .
+3.3G    total
+
+
+Engine: MyRocks 
+Config: Binlog OFF
+LOAD INFILE uncompressed to pipe
+real    8m2.774s
+user    0m33.811s
+sys     0m4.433s
+mysql> select count(*) from myrocks_test.ontime_myrocks;
+
++----------+
+| count(*) |
++----------+
+| 14009743 |
++----------+
+1 row in set (55.57 sec)
+
+[root@ip-172-30-1-9 rocksdb-wal]# du -sch .
+1.9G	.
+1.9G	total
+
+
+Engine: InnoDB 
+Config: Binlog OFF
+LOAD INFILE uncompressed to pipe
+real    9m56.238s
+user    0m34.745s
+sys     0m4.482s
+mysql> select count(*) from innodb_test.ontime_innodb;
++----------+
+| count(*) |
++----------+
+| 14009743 |
++----------+
+1 row in set (21.52 sec)
+[ec2-user@ip-172-30-1-9 scripts]$ sudo ls -lsh /var/lib/mysql/innodb_test
+total 5.6G
+5.6G -rw-r-----. 1 mysql mysql 5.6G Feb 11 12:20 ontime_innodb.ibd
+
+
+Engine: InnoDB  - Compressed
+Config: Binlog OFF
+LOAD INFILE uncompressed to pipe
+real    15m56.524s
+user    0m34.766s
+sys     0m4.701s
+[ec2-user@ip-172-30-1-9 scripts]$ sudo ls -lsh /var/lib/mysql/innodb_test
+total 2.6G
+2.6G -rw-r-----. 1 mysql mysql 2.6G Feb 11 13:13 ontime_innodb_compressed.ibd
+mysql> select count(*) from innodb_test.ontime_innodb_compressed;
++----------+
+| count(*) |
++----------+
+| 14009743 |
++----------+
+1 row in set (24.84 sec)
+mysql> SELECT table_name AS `Table`, round(data_length/1024/1024,2) `Table Size in MB`, round(index_length/1024/1024,2) `Index Size in MB`, round(((data_length + index_length) / 1024 / 1024), 2) `Size in MB` FROM information_schema.TABLES order by 2 desc limit 5;
++--------------------------+------------------+------------------+------------+
+| Table                    | Table Size in MB | Index Size in MB | Size in MB |
++--------------------------+------------------+------------------+------------+
+| ontime_innodb_compressed |          2558.50 |             0.00 |    2558.50 |
+| help_topic               |             1.52 |             0.13 |       1.64 |
+| help_keyword             |             0.09 |             0.09 |       0.19 |
+| help_relation            |             0.08 |             0.00 |       0.08 |
+| component                |             0.02 |             0.00 |       0.02 |
++--------------------------+------------------+------------------+------------+
+5 rows in set (0.23 sec)
+
+
+
+Engine: InnoDB  - Compressed
+Config: Binlog ON
+LOAD INFILE uncompressed to pipe
+real    17m39.193s
+user    0m34.696s
+sys     0m4.670s
+[root@ip-172-30-1-9 innodb_test]# ls -lsh .
+total 2.6G
+2.6G -rw-r-----. 1 mysql mysql 2.6G Feb 11 15:22 ontime_innodb_compressed.ibd
+[root@ip-172-30-1-9 innodb_test]# exit
+mysql> SELECT table_name AS `Table`, round(data_length/1024/1024,2) `Table Size in MB`, round(index_length/1024/1024,2) `Index Size in MB`, round(((data_length + index_length) / 1024 / 1024), 2) `Size in MB` FROM information_schema.TABLES order by 2 desc limit 5;
++--------------------------+------------------+------------------+------------+
+| Table                    | Table Size in MB | Index Size in MB | Size in MB |
++--------------------------+------------------+------------------+------------+
+| ontime_innodb_compressed |          2534.00 |             0.00 |    2534.00 |
+| help_topic               |             1.52 |             0.13 |       1.64 |
+| help_keyword             |             0.09 |             0.09 |       0.19 |
+| help_relation            |             0.08 |             0.00 |       0.08 |
+| component                |             0.02 |             0.00 |       0.02 |
++--------------------------+------------------+------------------+------------+
+5 rows in set (0.17 sec)
+
+
+
